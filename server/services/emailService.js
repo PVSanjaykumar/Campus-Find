@@ -1,6 +1,8 @@
-const { Resend } = require("resend");
+const { BrevoClient } = require("@getbrevo/brevo");
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const brevo = new BrevoClient({
+  apiKey: process.env.BREVO_API_KEY,
+});
 
 const sendMatchNotification = async ({
   lostUser,
@@ -13,11 +15,21 @@ const sendMatchNotification = async ({
 
   const createEmail = (recipient, userItem, matchedItem) => {
     return {
-      from: "Campus Lost & Found <onboarding@resend.dev>",
-      to: recipient.email,
+      sender: {
+        name: "Campus Lost & Found",
+        email: "rkvlostfound@gmail.com",
+      },
+
+      to: [
+        {
+          email: recipient.email,
+          name: recipient.name,
+        },
+      ],
+
       subject,
 
-      html: `
+      htmlContent: `
         <div style="
           font-family: Arial, sans-serif;
           max-width: 650px;
@@ -115,22 +127,23 @@ const sendMatchNotification = async ({
     };
   };
 
-  // Email to the person who reported the Lost item
-  const { error: lostEmailError } = await resend.emails.send(
-    createEmail(lostUser, lostItem, foundItem)
-  );
+  try {
+    // Email to the person who reported the Lost item
+    const lostEmail = await brevo.transactionalEmails.sendTransacEmail(
+      createEmail(lostUser, lostItem, foundItem)
+    );
 
-  if (lostEmailError) {
-    console.error("Failed to send email to lost-item user:", lostEmailError);
-  }
+    console.log("Lost-item email sent:", lostEmail.messageId);
 
-  // Email to the person who reported the Found item
-  const { error: foundEmailError } = await resend.emails.send(
-    createEmail(foundUser, foundItem, lostItem)
-  );
+    // Email to the person who reported the Found item
+    const foundEmail = await brevo.transactionalEmails.sendTransacEmail(
+      createEmail(foundUser, foundItem, lostItem)
+    );
 
-  if (foundEmailError) {
-    console.error("Failed to send email to found-item user:", foundEmailError);
+    console.log("Found-item email sent:", foundEmail.messageId);
+
+  } catch (error) {
+    console.error("Brevo email error:", error);
   }
 };
 
