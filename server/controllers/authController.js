@@ -2,8 +2,11 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const nodemailer = require("nodemailer");
+const { BrevoClient } = require("@getbrevo/brevo");
 
+const brevo = new BrevoClient({
+  apiKey: process.env.BREVO_API_KEY,
+});
 // Register
 const registerUser = async (req, res) => {
   try {
@@ -156,80 +159,84 @@ const forgotPassword = async (req, res) => {
     await user.save();
 
     // Create email transporter
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+    const resetUrl = `${
+      process.env.FRONTEND_URL || "http://localhost:5173"
+    }/reset-password/${resetToken}`;
+
+    await brevo.transactionalEmails.sendTransacEmail({
+      sender: {
+        name: "Campus Lost & Found",
+        email: "rkvlostfound@gmail.com",
       },
-    });
 
-    const resetUrl = `http://localhost:5173/reset-password/${resetToken}`;
+      to: [
+        {
+          email: user.email,
+          name: user.name,
+        },
+      ],
 
-    await transporter.sendMail({
-      from: `"Campus Lost & Found" <${process.env.EMAIL_USER}>`,
-      to: user.email,
       subject: "Reset Your Campus Lost & Found Password",
 
-      html: `
-        <div style="
-          font-family: Arial, sans-serif;
-          max-width: 600px;
-          margin: auto;
-          padding: 25px;
-        ">
+      htmlContent: `
+    <div style="
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: auto;
+      padding: 25px;
+    ">
 
-          <h2 style="color: #2563eb;">
-            🎓 Campus Lost & Found
-          </h2>
+      <h2 style="color: #2563eb;">
+        🎓 Campus Lost & Found
+      </h2>
 
-          <h3>Password Reset Request</h3>
+      <h3>Password Reset Request</h3>
 
-          <p>
-            Hello <strong>${user.name}</strong>,
-          </p>
+      <p>
+        Hello <strong>${user.name}</strong>,
+      </p>
 
-          <p>
-            We received a request to reset the password
-            for your Campus Lost & Found account.
-          </p>
+      <p>
+        We received a request to reset the password
+        for your Campus Lost & Found account.
+      </p>
 
-          <p>
-            Click the button below to create a new password.
-          </p>
+      <p>
+        Click the button below to create a new password.
+      </p>
 
-          <div style="margin: 30px 0;">
-            <a
-              href="${resetUrl}"
-              style="
-                background: #2563eb;
-                color: white;
-                padding: 12px 22px;
-                text-decoration: none;
-                border-radius: 8px;
-                display: inline-block;
-              "
-            >
-              Reset Password
-            </a>
-          </div>
+      <div style="margin: 30px 0;">
+        <a
+          href="${resetUrl}"
+          style="
+            background: #2563eb;
+            color: white;
+            padding: 12px 22px;
+            text-decoration: none;
+            border-radius: 8px;
+            display: inline-block;
+          "
+        >
+          Reset Password
+        </a>
+      </div>
 
-          <p>
-            This link will expire in
-            <strong>15 minutes</strong>.
-          </p>
+      <p>
+        This link will expire in
+        <strong>15 minutes</strong>.
+      </p>
 
-          <p>
-            If you did not request a password reset,
-            you can safely ignore this email.
-          </p>
+      <p>
+        If you did not request a password reset,
+        you can safely ignore this email.
+      </p>
 
-          <p style="color: #64748b;">
-            This is an automated email from Campus Lost & Found.
-          </p>
+      <p style="color: #64748b;">
+        This is an automated email from Campus Lost & Found.
+      </p>
 
-        </div>
-      `,
+    </div>
+  `,
     });
 
     res.status(200).json({
