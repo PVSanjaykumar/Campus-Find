@@ -1,12 +1,6 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const sendMatchNotification = async ({
   lostUser,
@@ -19,7 +13,7 @@ const sendMatchNotification = async ({
 
   const createEmail = (recipient, userItem, matchedItem) => {
     return {
-      from: `"Campus Lost & Found" <${process.env.EMAIL_USER}>`,
+      from: "Campus Lost & Found <onboarding@resend.dev>",
       to: recipient.email,
       subject,
 
@@ -122,10 +116,22 @@ const sendMatchNotification = async ({
   };
 
   // Email to the person who reported the Lost item
-  await transporter.sendMail(createEmail(lostUser, lostItem, foundItem));
+  const { error: lostEmailError } = await resend.emails.send(
+    createEmail(lostUser, lostItem, foundItem)
+  );
+
+  if (lostEmailError) {
+    console.error("Failed to send email to lost-item user:", lostEmailError);
+  }
 
   // Email to the person who reported the Found item
-  await transporter.sendMail(createEmail(foundUser, foundItem, lostItem));
+  const { error: foundEmailError } = await resend.emails.send(
+    createEmail(foundUser, foundItem, lostItem)
+  );
+
+  if (foundEmailError) {
+    console.error("Failed to send email to found-item user:", foundEmailError);
+  }
 };
 
 module.exports = {
