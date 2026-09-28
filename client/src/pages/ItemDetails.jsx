@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import API from "../services/api";
 
+const SERVER_URL = "https://campus-find-api-l3ae.onrender.com";
+
+const getImageUrl = (image) => {
+  if (!image) return "";
+  return image.startsWith("http") ? image : `${SERVER_URL}${image}`;
+};
+
 function ItemDetails() {
   const { id } = useParams();
 
@@ -75,7 +82,7 @@ function ItemDetails() {
         <div className="details-content">
           {item.image ? (
             <img
-              src={`http://localhost:5000${item.image}`}
+              src={getImageUrl(item.image)}
               alt={item.itemName}
               className="details-image"
             />

@@ -1,7 +1,7 @@
-
 // Create a new lost/found item
 const Item = require("../models/Item");
 
+const cloudinary = require("../config/cloudinary");
 const createItem = async (req, res) => {
   try {
     const { itemType, itemName, location, itemDate, description, details } =
@@ -13,7 +13,29 @@ const createItem = async (req, res) => {
       });
     }
 
-    const image = req.file ? `/uploads/${req.file.filename}` : "";
+    let image = "";
+
+    if (req.file) {
+      const result = await new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+          {
+            folder: "campusfind",
+            resource_type: "image",
+          },
+          (error, result) => {
+            if (error) {
+              reject(error);
+            } else {
+              resolve(result);
+            }
+          },
+        );
+
+        uploadStream.end(req.file.buffer);
+      });
+
+      image = result.secure_url;
+    }
 
     const parsedDetails =
       typeof details === "string" ? JSON.parse(details) : details || {};

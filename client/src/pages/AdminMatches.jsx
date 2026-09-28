@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import API from "../services/api";
 
+const SERVER_URL = "https://campus-find-api-l3ae.onrender.com";
+
+const getImageUrl = (image) => {
+  if (!image) return "";
+  return image.startsWith("http") ? image : `${SERVER_URL}${image}`;
+};
+
 function AdminMatches() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -105,7 +112,7 @@ function AdminMatches() {
 
                     {match.lostItem?.image ? (
                       <img
-                        src={`http://localhost:5000${match.lostItem.image}`}
+                        src={getImageUrl(match.lostItem.image)}
                         alt={match.lostItem.itemName}
                         className="admin-match-image"
                       />
@@ -153,7 +160,7 @@ function AdminMatches() {
 
                     {match.foundItem?.image ? (
                       <img
-                        src={`http://localhost:5000${match.foundItem.image}`}
+                        src={getImageUrl(match.foundItem.image)}
                         alt={match.foundItem.itemName}
                         className="admin-match-image"
                       />

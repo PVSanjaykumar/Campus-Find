@@ -2,6 +2,13 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import API from "../services/api";
 
+const SERVER_URL = "https://campus-find-api-l3ae.onrender.com";
+
+const getImageUrl = (image) => {
+  if (!image) return "";
+  return image.startsWith("http") ? image : `${SERVER_URL}${image}`;
+};
+
 function StudentDashboard() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -168,7 +175,7 @@ function StudentDashboard() {
               <div className="dashboard-item-card" key={item._id}>
                 {item.image ? (
                   <img
-                    src={`http://localhost:5000${item.image}`}
+                    src={getImageUrl(item.image)}
                     alt={item.itemName}
                     className="dashboard-item-image"
                   />

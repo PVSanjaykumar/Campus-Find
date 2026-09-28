@@ -3,6 +3,11 @@ import { Link } from "react-router-dom";
 import API from "../services/api";
 const SERVER_URL = "https://campus-find-api-l3ae.onrender.com";
 
+const getImageUrl = (image) => {
+  if (!image) return "";
+  return image.startsWith("http") ? image : `${SERVER_URL}${image}`;
+};
+
 function MyMatches() {
   const [matches, setMatches] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -139,7 +144,7 @@ function MyMatches() {
 
                     {match.lostItem?.image ? (
                       <img
-                        src={`${SERVER_URL}${match.lostItem.image}`}
+                        src={getImageUrl(match.lostItem.image)}
                         alt={match.lostItem.itemName}
                         className="match-item-image"
                       />
@@ -171,7 +176,7 @@ function MyMatches() {
 
                     {match.foundItem?.image ? (
                       <img
-                        src={`${SERVER_URL}${match.foundItem.image}`}
+                        src={getImageUrl(match.foundItem.image)}
                         alt={match.foundItem.itemName}
                         className="match-item-image"
                       />
