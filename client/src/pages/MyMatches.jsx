@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import API from "../services/api";
+const SERVER_URL = "https://campus-find-api-l3ae.onrender.com";
 
 function MyMatches() {
   const [matches, setMatches] = useState([]);
@@ -138,7 +139,7 @@ function MyMatches() {
 
                     {match.lostItem?.image ? (
                       <img
-                        src={`http://localhost:5000${match.lostItem.image}`}
+                        src={`${SERVER_URL}${match.lostItem.image}`}
                         alt={match.lostItem.itemName}
                         className="match-item-image"
                       />
@@ -170,7 +171,7 @@ function MyMatches() {
 
                     {match.foundItem?.image ? (
                       <img
-                        src={`http://localhost:5000${match.foundItem.image}`}
+                        src={`${SERVER_URL}${match.foundItem.image}`}
                         alt={match.foundItem.itemName}
                         className="match-item-image"
                       />

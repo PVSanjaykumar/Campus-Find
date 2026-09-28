@@ -237,7 +237,7 @@ const forgotPassword = async (req, res) => {
 
     </div>
   `,
-    });
+    });6
 
     res.status(200).json({
       message:
